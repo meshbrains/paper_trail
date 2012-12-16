@@ -216,7 +216,13 @@ module PaperTrail
         end
         previous.tap do |prev|
           prev.id = id
-          changed_attributes.each { |attr, before| prev[attr] = before }
+          changed_attributes.each do |attr, before|
+            if defined?(CarrierWave::Uploader::Base) && before.is_a?(CarrierWave::Uploader::Base)
+              prev.send(:write_attribute, attr, before.url && File.basename(before.url))
+            else
+              prev[attr] = before
+            end
+          end
         end
       end
 
